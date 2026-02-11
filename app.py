@@ -3,8 +3,7 @@ import pandas as pd
 from PIL import Image
 import io
 import base64
-from database import init_db, add_book, get_books, delete_book, update_book
-from styles import get_custom_css, get_star_rating_html
+
 
 # Page Config
 st.set_page_config(
@@ -185,4 +184,5 @@ def main():
                 st.warning("No se encontraron libros.")
 
 if __name__ == "__main__":
+
     main()
