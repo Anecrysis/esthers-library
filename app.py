@@ -132,7 +132,6 @@ def main():
                         "notes": str(notes),
                         "rating": str(rating),
                         "photo": str(photo_str)
-                    }
                     
                     # MÉTODO SEGURO: Convertir a lista de valores para evitar errores de pandas
                     try:
@@ -186,5 +185,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
