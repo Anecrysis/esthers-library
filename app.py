@@ -107,7 +107,7 @@ def main():
             
             submit = st.form_submit_button("Guardar en la Biblioteca")
             
-            if submit:
+           if submit:
                 if title:
                     # Procesar foto
                     photo_str = ""
@@ -117,29 +117,38 @@ def main():
                         img.save(buf, format="JPEG")
                         photo_str = base64.b64encode(buf.getvalue()).decode()
 
-                    # Crear nueva fila
-                    new_book = pd.DataFrame([{
+                    # Crear nueva fila como diccionario
+                    new_book_data = {
                         "id": len(df) + 1,
-                        "title": title,
-                        "author": author,
-                        "genre": genre,
+                        "title": str(title),
+                        "author": str(author),
+                        "genre": str(genre),
                         "pages": int(pages),
                         "start_date": str(start_date),
                         "end_date": str(end_date),
-                        "cover_type": cover,
-                        "origin": origin,
+                        "cover_type": str(cover),
+                        "origin": str(origin),
                         "publisher": "",
-                        "notes": notes,
-                        "rating": rating,
-                        "photo": photo_str
-                    }])
+                        "notes": str(notes),
+                        "rating": str(rating),
+                        "photo": str(photo_str)
+                    }
                     
-                    # Actualizar Google Sheets
-                    updated_df = pd.concat([df, new_book], ignore_index=True)
-                    conn.update(worksheet="Libros", data=updated_df)
-                    st.success(f"¡'{title}' ha sido guardado con éxito! 🌸")
+                    # MÉTODO SEGURO: Convertir a lista de valores para evitar errores de pandas
+                    try:
+                        # Creamos el DataFrame actualizado
+                        updated_df = pd.concat([df, pd.DataFrame([new_book_data])], ignore_index=True)
+                        
+                        # Intentamos actualizar. 
+                        # IMPORTANTE: Asegúrate de que los Secrets tengan la URL terminada en /edit
+                        conn.update(worksheet="Libros", data=updated_df)
+                        st.success(f"¡'{title}' guardado! 🌸")
+                        st.balloons() # ¡Celebración si funciona!
+                    except Exception as e:
+                        st.error(f"Error al conectar: {e}")
+                        st.info("Revisa si el email de la cuenta de servicio es EDITOR en el Excel.")
                 else:
-                    st.error("Por favor, introduce al menos el título.")
+                    st.error("El título es obligatorio")
 
     elif choice == "Mi Biblioteca":
         st.markdown("### 📖 Mi Colección")
@@ -178,3 +187,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
