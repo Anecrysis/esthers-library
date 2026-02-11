@@ -59,7 +59,7 @@ def apply_custom_styles():
 apply_custom_styles()
 
 # 3. Conexión a Google Sheets
-conn = st.connection("gsheets", type=GSheetsConnection)
+conn = st.connection("gsheets", type=GSheetsConnection, ttl=0)
 
 def load_data():
     try:
@@ -152,6 +152,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
