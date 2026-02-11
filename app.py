@@ -149,7 +149,6 @@ def main():
                         st.info("Revisa si el email de la cuenta de servicio es EDITOR en el Excel.")
                 else:
                     st.error("El título es obligatorio")
-
     elif choice == "Mi Biblioteca":
         st.markdown("### 📖 Mi Colección")
         if not df.empty:
@@ -187,4 +186,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
