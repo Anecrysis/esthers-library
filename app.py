@@ -88,8 +88,6 @@ def main():
         with st.form("form_libro", clear_on_submit=True):
             col1, col2 = st.columns(2)
             
-            with st.form("form_libro", clear_on_submit=True):
-            col1, col2 = st.columns(2)
             with col1:
                 title = st.text_input("Título del libro (Obligatorio) *")
                 author = st.text_input("Autor")
@@ -154,6 +152,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
