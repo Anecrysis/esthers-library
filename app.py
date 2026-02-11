@@ -107,11 +107,25 @@ def main():
             if submit:
                 if title:
                     photo_str = ""
+                    # Procesar foto con compresión fuerte para Google Sheets
+                    photo_str = ""
                     if camera_photo:
                         img = Image.open(camera_photo)
+                        
+                        # 1. Redimensionar la imagen para que sea pequeña (max 300px)
+                        img.thumbnail((300, 300)) 
+                        
+                        # 2. Guardar con compresión JPEG alta
                         buf = io.BytesIO()
-                        img.save(buf, format="JPEG")
+                        img.save(buf, format="JPEG", quality=40) # Calidad al 40% para ahorrar espacio
+                        
+                        # 3. Convertir a texto
                         photo_str = base64.b64encode(buf.getvalue()).decode()
+                        
+                        # Verificación de seguridad: si aún así es muy larga, avisar
+                        if len(photo_str) > 49000:
+                            st.warning("La foto es demasiado compleja, se guardará sin imagen para evitar errores.")
+                            photo_str = ""
                     
                     new_book_data = {
                         "id": len(df) + 1,
@@ -152,6 +166,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
