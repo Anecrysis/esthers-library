@@ -13,8 +13,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Initialize Database
-init_db()
+
 
 # Apply Custom CSS
 st.markdown(get_custom_css(), unsafe_allow_html=True)
@@ -186,3 +185,4 @@ def main():
 if __name__ == "__main__":
 
     main()
+
