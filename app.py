@@ -88,36 +88,33 @@ def main():
         with st.form("form_libro", clear_on_submit=True):
             col1, col2 = st.columns(2)
             
+            with st.form("form_libro", clear_on_submit=True):
+            col1, col2 = st.columns(2)
             with col1:
                 title = st.text_input("Título del libro (Obligatorio) *")
                 author = st.text_input("Autor")
                 genre = st.selectbox("Género", ["Novela", "Fantasía", "Romance", "Misterio", "Historia", "Poesía", "Otro"])
                 pages = st.number_input("Número de páginas", min_value=1, step=1)
-            
             with col2:
                 cover = st.selectbox("Tipo de Tapa", ["Dura", "Blanda"])
                 origin = st.selectbox("¿Cómo llegó a ti?", ["Comprado", "Regalado"])
                 start_date = st.date_input("Fecha de inicio")
                 end_date = st.date_input("Fecha de fin")
-                
             notes = st.text_area("Observaciones (máx. 240 car.)", max_chars=240)
             rating = st.select_slider("Calificación", options=["⭐", "⭐⭐", "⭐⭐⭐", "⭐⭐⭐⭐", "⭐⭐⭐⭐⭐"])
-            
             camera_photo = st.camera_input("Captura la portada")
             
             submit = st.form_submit_button("Guardar en la Biblioteca")
             
-           if submit:
+            if submit:
                 if title:
-                    # Procesar foto
                     photo_str = ""
                     if camera_photo:
                         img = Image.open(camera_photo)
                         buf = io.BytesIO()
                         img.save(buf, format="JPEG")
                         photo_str = base64.b64encode(buf.getvalue()).decode()
-
-                    # Crear nueva fila como diccionario
+                    
                     new_book_data = {
                         "id": len(df) + 1,
                         "title": str(title),
@@ -132,45 +129,17 @@ def main():
                         "notes": str(notes),
                         "rating": str(rating),
                         "photo": str(photo_str)
+                    }
                     
-                    # MÉTODO SEGURO: Convertir a lista de valores para evitar errores de pandas
                     try:
-                        # Creamos el DataFrame actualizado
                         updated_df = pd.concat([df, pd.DataFrame([new_book_data])], ignore_index=True)
-                        
-                        # Intentamos actualizar. 
-                        # IMPORTANTE: Asegúrate de que los Secrets tengan la URL terminada en /edit
                         conn.update(worksheet="Libros", data=updated_df)
                         st.success(f"¡'{title}' guardado! 🌸")
-                        st.balloons() # ¡Celebración si funciona!
+                        st.balloons()
                     except Exception as e:
-                        st.error(f"Error al conectar: {e}")
-                        st.info("Revisa si el email de la cuenta de servicio es EDITOR en el Excel.")
+                        st.error(f"Error de conexión: {e}")
                 else:
-                    st.error("El título es obligatorio")
-    elif choice == "Mi Biblioteca":
-        st.markdown("### 📖 Mi Colección")
-        if not df.empty:
-            for _, row in df.iterrows():
-                with st.container():
-                    st.markdown(f"""
-                    <div class="book-card">
-                        <h2 style='margin:0;'>{row['title']}</h2>
-                        <p><b>Autor:</b> {row['author']} | <b>Género:</b> {row['genre']}</p>
-                        <p><b>Calificación:</b> {row['rating']}</p>
-                        <p style='font-style: italic;'>"{row['notes']}"</p>
-                        <hr>
-                        <p style='font-size: 0.8em;'>Tapa {row['cover_type']} | {row['pages']} págs | {row['origin']}</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    if row['photo']:
-                        try:
-                            st.image(base64.b64decode(row['photo']), width=200)
-                        except:
-                            pass
-        else:
-            st.info("La biblioteca está esperando su primer libro...")
-
+                    st.error("Por favor, introduce al menos el título.")
     elif choice == "Buscar":
         st.markdown("### 🔍 Buscador")
         search_term = st.text_input("Busca por título o autor")
@@ -185,6 +154,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
