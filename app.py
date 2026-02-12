@@ -4,6 +4,7 @@ from PIL import Image
 import io
 import base64
 from streamlit_gsheets import GSheetsConnection
+from datetime import datetime
 
 # 1. Configuración de la página
 st.set_page_config(page_title="Esther's Library", page_icon="📚", layout="wide")
@@ -17,6 +18,7 @@ def apply_custom_styles():
     .book-card { background-color: rgba(255, 255, 255, 0.95); border-radius: 15px; padding: 20px; margin-bottom: 20px; border-left: 8px solid #ffb7c5; color: #2d3436; position: relative; box-shadow: 5px 5px 15px rgba(0,0,0,0.3); }
     .book-card::after { content: '🐱'; position: absolute; bottom: 10px; right: 15px; font-size: 20px; }
     .book-card::before { content: '🦋'; position: absolute; top: 10px; right: 15px; font-size: 20px; }
+    .stMetric { background-color: rgba(255, 255, 255, 0.9); padding: 10px; border-radius: 10px; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -36,7 +38,7 @@ def load_data():
 def main():
     st.markdown('<h1 class="main-title">🦋 Esther\'s Library 🦋</h1>', unsafe_allow_html=True)
     
-    menu = ["Mi Biblioteca", "Agregar Libro", "Buscar", "Gestionar"]
+    menu = ["Mi Biblioteca", "Agregar Libro", "Buscar", "Estadísticas", "Gestionar"]
     choice = st.sidebar.selectbox("Menú de Navegación", menu)
     
     df = load_data()
@@ -99,6 +101,46 @@ def main():
                 st.success("¡Guardado!")
                 st.rerun()
 
+    elif choice == "Estadísticas":
+        st.markdown("### 📊 Mis Logros de Lectura")
+        if not df.empty:
+            # Convertir fechas a formato datetime
+            df['end_date'] = pd.to_datetime(df['end_date'], errors='coerce')
+            df_stats = df.dropna(subset=['end_date'])
+            
+            # Extraer año y mes
+            df_stats['Año'] = df_stats['end_date'].dt.year
+            df_stats['Mes_Num'] = df_stats['end_date'].dt.month
+            
+            # Selector de año
+            años_disponibles = sorted(df_stats['Año'].unique().astype(int), reverse=True)
+            año_sel = st.selectbox("Selecciona el año para revisar", años_disponibles)
+            
+            # Filtrar por año seleccionado
+            df_year = df_stats[df_stats['Año'] == año_sel]
+            
+            # Contar libros por mes
+            meses_nombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+            lecturas_por_mes = df_year.groupby('Mes_Num').size().reindex(range(1, 13), fill_value=0)
+            lecturas_df = pd.DataFrame({'Mes': meses_nombres, 'Libros': lecturas_por_mes.values})
+            
+            # Mostrar métricas
+            mes_actual = datetime.now().month
+            libros_mes_actual = lecturas_por_mes[mes_actual] if año_sel == datetime.now().year else 0
+            
+            col_m1, col_m2 = st.columns(2)
+            col_m1.metric("Total del año", f"{len(df_year)} libros")
+            col_m2.metric("Leídos este mes", f"{libros_mes_actual} libros")
+            
+            # Gráfico de barras
+            st.bar_chart(lecturas_df.set_index('Mes'), color="#ffb7c5")
+            
+            # Comparativa opcional
+            if len(df_year) > 0:
+                st.write(f"✨ En {año_sel}, tu mes más lector fue **{meses_nombres[lecturas_por_mes.argmax()]}**.")
+        else:
+            st.info("Aún no hay suficientes datos para generar estadísticas. ¡Sigue leyendo!")
+
     elif choice == "Buscar":
         st.markdown("### 🔍 Buscador")
         query = st.text_input("Buscar título o autor")
@@ -108,22 +150,15 @@ def main():
 
     elif choice == "Gestionar":
         st.markdown("### ⚙️ Administrar Biblioteca")
-        st.write("Aquí puedes eliminar libros de la base de datos.")
-        
         if not df.empty:
             for index, row in df.iterrows():
                 col_txt, col_btn = st.columns([4, 1])
-                with col_txt:
-                    st.write(f"**{row['title']}** - {row['author']}")
+                with col_txt: st.write(f"**{row['title']}** - {row['author']}")
                 with col_btn:
                     if st.button("Eliminar", key=f"del_{index}"):
-                        # Borrar la fila y actualizar
                         new_df = df.drop(index)
                         conn.update(worksheet="Libros", data=new_df)
-                        st.warning(f"Libro '{row['title']}' eliminado.")
                         st.rerun()
-        else:
-            st.info("No hay libros para gestionar.")
 
 if __name__ == "__main__":
     main()
