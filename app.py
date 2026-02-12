@@ -63,10 +63,8 @@ conn = st.connection("gsheets", type=GSheetsConnection, ttl=0)
 
 def load_data():
     try:
-        # Intenta leer la hoja "Libros"
         return conn.read(worksheet="Libros", ttl="0")
     except Exception:
-        # Si falla o no existe, devuelve un DataFrame vacío con las columnas correctas
         return pd.DataFrame(columns=[
             "id", "title", "author", "genre", "pages", "start_date", 
             "end_date", "cover_type", "origin", "publisher", "notes", "rating", "photo"
@@ -76,18 +74,44 @@ def load_data():
 def main():
     st.markdown('<h1 class="main-title">🦋 Esther\'s Library 🦋</h1>', unsafe_allow_html=True)
     
-    # Menú lateral
     menu = ["Mi Biblioteca", "Agregar Libro", "Buscar"]
     choice = st.sidebar.selectbox("Menú de Navegación", menu)
     
-    # Cargar datos actuales
     df = load_data()
 
-    if choice == "Agregar Libro":
+    if choice == "Mi Biblioteca":
+        st.markdown("### 📖 Mi Colección")
+        if not df.empty:
+            # Limpiamos filas que no tengan título (filas vacías accidentales en Excel)
+            df_clean = df.dropna(subset=['title'])
+            
+            for _, row in df_clean.iterrows():
+                with st.container():
+                    st.markdown(f"""
+                    <div class="book-card">
+                        <h2 style='margin:0;'>{row.get('title', 'Sin título')}</h2>
+                        <p><b>Autor:</b> {row.get('author', 'Desconocido')} | <b>Género:</b> {row.get('genre', '-')} </p>
+                        <p><b>Calificación:</b> {row.get('rating', '⭐')}</p>
+                        <p style='font-style: italic;'>"{row.get('notes', '')}"</p>
+                        <hr>
+                        <p style='font-size: 0.8em;'>Tapa {row.get('cover_type', '-')} | {row.get('pages', 0)} págs | {row.get('origin', '-')}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Mostrar foto si existe
+                    photo_data = row.get('photo', '')
+                    if photo_data and str(photo_data).strip() != "" and str(photo_data) != "nan":
+                        try:
+                            st.image(base64.b64decode(str(photo_data)), width=250)
+                        except:
+                            st.write("*(Imagen no disponible)*")
+        else:
+            st.info("La biblioteca está vacía. ¡Agrega tu primer libro! 🌸")
+
+    elif choice == "Agregar Libro":
         st.markdown("### ✨ Registrar nuevo tesoro")
         with st.form("form_libro", clear_on_submit=True):
             col1, col2 = st.columns(2)
-            
             with col1:
                 title = st.text_input("Título del libro (Obligatorio) *")
                 author = st.text_input("Autor")
@@ -107,24 +131,13 @@ def main():
             if submit:
                 if title:
                     photo_str = ""
-                    # Procesar foto con compresión fuerte para Google Sheets
-                    photo_str = ""
                     if camera_photo:
                         img = Image.open(camera_photo)
-                        
-                        # 1. Redimensionar la imagen para que sea pequeña (max 300px)
                         img.thumbnail((300, 300)) 
-                        
-                        # 2. Guardar con compresión JPEG alta
                         buf = io.BytesIO()
-                        img.save(buf, format="JPEG", quality=40) # Calidad al 40% para ahorrar espacio
-                        
-                        # 3. Convertir a texto
+                        img.save(buf, format="JPEG", quality=40)
                         photo_str = base64.b64encode(buf.getvalue()).decode()
-                        
-                        # Verificación de seguridad: si aún así es muy larga, avisar
                         if len(photo_str) > 49000:
-                            st.warning("La foto es demasiado compleja, se guardará sin imagen para evitar errores.")
                             photo_str = ""
                     
                     new_book_data = {
@@ -148,37 +161,26 @@ def main():
                         conn.update(worksheet="Libros", data=updated_df)
                         st.success(f"¡'{title}' guardado! 🌸")
                         st.balloons()
+                        st.info("Cargando cambios... vuelve a 'Mi Biblioteca' para verlo.")
                     except Exception as e:
                         st.error(f"Error de conexión: {e}")
                 else:
                     st.error("Por favor, introduce al menos el título.")
+
     elif choice == "Buscar":
         st.markdown("### 🔍 Buscador")
         search_term = st.text_input("Busca por título o autor")
-        
         if search_term:
-            # Convertimos las columnas a string y manejamos valores vacíos (NaN) con fillna
-            # Esto evita el error "Can only use .str accessor with string values!"
             mask = (
                 df['title'].astype(str).str.contains(search_term, case=False, na=False) | 
                 df['author'].astype(str).str.contains(search_term, case=False, na=False)
             )
             results = df[mask]
-            
             if not results.empty:
                 st.write(f"Se encontraron {len(results)} resultados:")
-                # Mostramos solo las columnas interesantes para que no sea un lío
                 st.table(results[['title', 'author', 'genre', 'rating']])
             else:
                 st.warning("No hay coincidencias para esa búsqueda.")
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
