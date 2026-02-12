@@ -155,17 +155,26 @@ def main():
     elif choice == "Buscar":
         st.markdown("### 🔍 Buscador")
         search_term = st.text_input("Busca por título o autor")
+        
         if search_term:
-            results = df[df['title'].str.contains(search_term, case=False, na=False) | 
-                        df['author'].str.contains(search_term, case=False, na=False)]
+            # Convertimos las columnas a string y manejamos valores vacíos (NaN) con fillna
+            # Esto evita el error "Can only use .str accessor with string values!"
+            mask = (
+                df['title'].astype(str).str.contains(search_term, case=False, na=False) | 
+                df['author'].astype(str).str.contains(search_term, case=False, na=False)
+            )
+            results = df[mask]
+            
             if not results.empty:
                 st.write(f"Se encontraron {len(results)} resultados:")
+                # Mostramos solo las columnas interesantes para que no sea un lío
                 st.table(results[['title', 'author', 'genre', 'rating']])
             else:
-                st.warning("No hay coincidencias.")
+                st.warning("No hay coincidencias para esa búsqueda.")
 
 if __name__ == "__main__":
     main()
+
 
 
 
