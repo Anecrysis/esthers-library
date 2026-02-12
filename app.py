@@ -10,15 +10,52 @@ from datetime import datetime
 st.set_page_config(page_title="Esther's Library", page_icon="📚", layout="wide")
 
 # 2. Estilos CSS
+# 2. Estilos CSS personalizados (Fondo de Gatos y Mariposas)
 def apply_custom_styles():
     st.markdown("""
     <style>
-    .stApp { background-color: #6a4c93; background-image: url("https://www.transparenttextures.com/patterns/cubes.png"); }
-    .main-title { color: #ffffff; text-align: center; font-family: 'Georgia', serif; text-shadow: 2px 2px 4px #000000; padding: 20px; background: rgba(106, 76, 147, 0.8); border-radius: 15px; }
-    .book-card { background-color: rgba(255, 255, 255, 0.95); border-radius: 15px; padding: 20px; margin-bottom: 20px; border-left: 8px solid #ffb7c5; color: #2d3436; position: relative; box-shadow: 5px 5px 15px rgba(0,0,0,0.3); }
-    .book-card::after { content: '🐱'; position: absolute; bottom: 10px; right: 15px; font-size: 20px; }
-    .book-card::before { content: '🦋'; position: absolute; top: 10px; right: 15px; font-size: 20px; }
-    .stMetric { background-color: rgba(255, 255, 255, 0.9); padding: 10px; border-radius: 10px; }
+    .stApp {
+        background-color: #6a4c93; /* Tu morado principal */
+        /* Imagen de siluetas de gatos sutiles que se repiten */
+        background-image: url("https://www.transparenttextures.com/patterns/paws.png"), 
+                          url("https://www.transparenttextures.com/patterns/black-linen.png");
+        background-attachment: fixed;
+    }
+    
+    /* Si prefieres siluetas de gatos más grandes, podemos usar esta otra técnica */
+    .stApp::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        /* Usamos un emoji o icono repetido como marca de agua */
+        background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext y='35' font-size='30' alpha='0.1'%3E🐱%3C/text%3E%3C/svg%3E");
+        opacity: 0.1; /* Esto hace que los gatos sean muy sutiles y no molesten al leer */
+        z-index: -1;
+    }
+
+    .main-title {
+        color: #ffffff;
+        text-align: center;
+        font-family: 'Georgia', serif;
+        text-shadow: 2px 2px 4px #000000;
+        padding: 20px;
+        background: rgba(106, 76, 147, 0.8);
+        border-radius: 15px;
+    }
+
+    .book-card {
+        background-color: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-left: 8px solid #ffb7c5; /* Rosa mariposa */
+        color: #2d3436;
+        position: relative;
+        box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -162,3 +199,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
