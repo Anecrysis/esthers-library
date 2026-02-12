@@ -14,15 +14,13 @@ st.set_page_config(page_title="Esther's Library", page_icon="📚", layout="wide
 def apply_custom_styles():
     st.markdown("""
     <style>
+    /* 1. Fondo base morado */
     .stApp {
-        background-color: #6a4c93; /* Tu morado principal */
-        /* Imagen de siluetas de gatos sutiles que se repiten */
-        background-image: url("https://www.transparenttextures.com/patterns/paws.png"), 
-                          url("https://www.transparenttextures.com/patterns/black-linen.png");
+        background-color: #6a4c93;
         background-attachment: fixed;
     }
-    
-    /* Si prefieres siluetas de gatos más grandes, podemos usar esta otra técnica */
+
+    /* 2. Capa de Gatos (Siluetas repetidas) */
     .stApp::before {
         content: "";
         position: fixed;
@@ -30,10 +28,17 @@ def apply_custom_styles():
         left: 0;
         width: 100%;
         height: 100%;
-        /* Usamos un emoji o icono repetido como marca de agua */
-        background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext y='35' font-size='30' alpha='0.1'%3E🐱%3C/text%3E%3C/svg%3E");
-        opacity: 0.1; /* Esto hace que los gatos sean muy sutiles y no molesten al leer */
-        z-index: -1;
+        /* Este código dibuja una silueta de gato sutil en patrón */
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 100 100'%3E%3Ctext y='50' font-size='40' opacity='0.15'%3E🐱%3C/text%3E%3C/svg%3E");
+        background-repeat: repeat;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    /* 3. Asegurar que el contenido esté por encima de los gatos */
+    .stApp > div {
+        position: relative;
+        z-index: 1;
     }
 
     .main-title {
@@ -44,6 +49,8 @@ def apply_custom_styles():
         padding: 20px;
         background: rgba(106, 76, 147, 0.8);
         border-radius: 15px;
+        position: relative;
+        z-index: 2;
     }
 
     .book-card {
@@ -51,11 +58,16 @@ def apply_custom_styles():
         border-radius: 15px;
         padding: 20px;
         margin-bottom: 20px;
-        border-left: 8px solid #ffb7c5; /* Rosa mariposa */
+        border-left: 8px solid #ffb7c5;
         color: #2d3436;
         position: relative;
         box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+        z-index: 2;
     }
+    
+    /* Decoración extra en las tarjetas */
+    .book-card::after { content: '🐱'; position: absolute; bottom: 10px; right: 15px; font-size: 20px; opacity: 0.5; }
+    .book-card::before { content: '🦋'; position: absolute; top: 10px; right: 15px; font-size: 20px; opacity: 0.5; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -199,4 +211,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
