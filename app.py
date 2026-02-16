@@ -121,8 +121,8 @@ def main():
                 genre = st.selectbox("Género", ["Novela", "Fantasía", "Romance", "Misterio", "Historia", "Poesía", "Otro"])
                 pages = st.number_input("Páginas", min_value=1, step=1)
             with col2:
-                cover = st.selectbox("Tapa", ["Dura", "Blanda"])
-                origin = st.selectbox("Origen", ["Comprado", "Regalado"])
+                cover = st.selectbox("Tapa", ["Dura", "Blanda", "eBook"])
+                origin = st.selectbox("Origen", ["Comprado", "Regalado", "Prestado"])
                 start_date = st.date_input("Inicio")
                 end_date = st.date_input("Fin")
             notes = st.text_area("Notas", max_chars=240)
@@ -211,5 +211,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
